@@ -4,11 +4,11 @@ variables:
     {#
       UpdateLevitonControllers
 
-      Toggles the state of the switches controlled by the
-      network of VRCZ4 controllers based on device events.
+      Toggles the state of the switches/lights controlled by
+      the network of VRCZ4 controllers based on device events.
 
       Also updates controller LEDs to match the state of the
-      switches.
+      switches/lights.
 
       Can be called in 2 ways:
 
@@ -18,29 +18,30 @@ variables:
          - value(int) - 1-4 if "On" side of the corresponding
            button was pressed. 5-8 if "Off" side was pressed.
 
-      2. When a switch is toggled (physically or in UI)
+      2. When a switch/light is toggled (physically or in UI)
          Expected parameters:
          - switch_entity_id(string) - entry name of the toggled
-           switch.
+           switch/light.
 
       Setup:
       
       Define below 'dev_db' dictionary of lists to represent the
-      mapping of the controller buttons to corresponding switches
-      in your network.
+      mapping of the controller buttons to the corresponding
+      switches/lights in your network.
+
       Element 0 in each list corresponds to the 1st button,
-      element 1 to 2nd and so on. Up to 4 elements per list.
+      element 1 to the 2nd and so on. Up to 4 elements per list.
       
       E.g.
       {
-        'abc': ['switch1.name', 'switch2.name'],
-        'xyz': ['switch3.name', 'switch2.name', 'switch4.name']
+        'abc': ['switch.entity1', 'light.entity2'],
+        'xyz': ['light.entity3', 'light.entity2', 'switch.entity4']
       }
 
       Represents a network of 2 controllers with device ids 'abc' and 'xyz'.
-      Controller 'abc' has buttons 1 and 2 assigned to switch1 and switch2.
-      Controller 'xyz' has buttons 1, 2, 3 assigend to switch3, switch2
-      and switch4 in that order.
+      Controller 'abc' has buttons 1 and 2 assigned to entity1 and entity2.
+      Controller 'xyz' has buttons 1, 2, 3 assigend to entity3, entity2
+      and entity4 in that order.
     #}
     {{ >>> DEFINE DICTIONARY HERE <<< }}
 sequence:
