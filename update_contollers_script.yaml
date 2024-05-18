@@ -20,7 +20,7 @@ variables:
 
       2. When a switch is toggled (physically or in UI)
          Expected parameters:
-         - switch_entity_id (string) - entry name of the toggled
+         - switch_entity_id(string) - entry name of the toggled
            switch.
 
       Setup:
@@ -46,79 +46,62 @@ variables:
 sequence:
   - if:
       - condition: template
+        alias: Is this is a controller key press?
         value_template: "{{ ctrl_device_id is defined }}"
     then:
-      - if:
-          - condition: template
-            value_template: "{{ value < 5 }}"
-        then:
-          - if:
+      - choose:
+          - conditions:
               - condition: template
-                value_template: "{{ dev_db[ctrl_device_id][value - 1].startswith('light') }}"
-            then:
-              - service: light.turn_on
-                target:
-                  device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
-            else:
-              - service: switch.turn_on
-                target:
-                  device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
-        else:
-          - if:
-              - condition: template
-                value_template: "{{ dev_db[ctrl_device_id][value - 5].startswith('light') }}"
-            then:
-              - service: light.turn_off
-                target:
-                  device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
-            else:
-              - service: switch.turn_off
-                target:
-                  device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
-  - repeat:
-      for_each: |
-        {% set ns = namespace(switch_id='', ctrls=[]) %}
-        {% if switch_entity_id is defined %}
-        {%   set ns.switch_id = switch_entity_id %}
-        {% else %}
-        {%   set ns.switch_id = dev_db[ctrl_device_id][(value - 1) % 4] %}
-        {% endif %}
-        {% for ctrl_id, sw_list in dev_db.items() %}
-        {%   if ns.switch_id in sw_list %}
-        {%     set ns.ctrls = ns.ctrls + [ctrl_id] %}
-        {%   endif %}
-        {% endfor %}
-        {{ ns.ctrls }}
-      sequence:
-        - variables:
-            led_byte: |
-              {% macro leviton_leds(switch_entities) %}
-              {% set bitmap = [{'off': 0, 'on': 1},
-                               {'off': 0, 'on': 2},
-                               {'off': 0, 'on': 4},
-                               {'off': 0, 'on': 8}] %}
-              {% set ns = namespace(x=[]) %}
-              {% for i in range(switch_entities|length) %}
-              {% set ns.x = ns.x + [bitmap[i][states(switch_entities[i])]] %}
-              {% endfor %}
-              {{ ns.x|sum }}
-              {% endmacro %}
-              {{leviton_leds(dev_db[repeat.item])}}
-        - service: zwave_js.invoke_cc_api
-          data:
-            command_class: "145"
-            method_name: sendData
-            parameters:
-              - 29
-              - type: Buffer
+                alias: Is this is an On key press and device is Off?
+                value_template: >
+                  {{ value < 5 and states(dev_db[ctrl_device_id][value - 1]) ==
+                  'off' }}
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: >
+                      {{ dev_db[ctrl_device_id][value - 1].startswith('light')
+                      }}
+                then:
+                  - service: light.turn_on
+                    target:
+                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
+                else:
+                  - service: switch.turn_on
+                    target:
+                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
+              - service: script.updatelevitonleds
                 data:
-                  - 13
-                  - 1
-                  - 255
-                  - "{{led_byte}}"
-                  - 0
-                  - 0
-                  - 10
-            device_id: "{{repeat.item}}"
+                  dev_db: "{{dev_db}}"
+                  switch_entity_id: "{{dev_db[ctrl_device_id][value - 1]}}"
+          - conditions:
+              - condition: template
+                alias: Is this is an Off key press and device is On?
+                value_template: >
+                  {{ value > 4 and states(dev_db[ctrl_device_id][value - 5]) ==
+                  'on' }}
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: >
+                      {{ dev_db[ctrl_device_id][value - 5].startswith('light')
+                      }}
+                then:
+                  - service: light.turn_off
+                    target:
+                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
+                else:
+                  - service: switch.turn_off
+                    target:
+                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
+              - service: script.updatelevitonleds
+                data:
+                  dev_db: "{{dev_db}}"
+                  switch_entity_id: "{{dev_db[ctrl_device_id][value - 5]}}"
+    else:
+      - service: script.updatelevitonleds
+        data:
+          dev_db: "{{dev_db}}"
+          switch_entity_id: "{{switch_entity_id}}"
 mode: single
 icon: mdi:microsoft-xbox-controller-menu
