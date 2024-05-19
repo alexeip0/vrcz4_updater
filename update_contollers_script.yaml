@@ -20,7 +20,7 @@ variables:
 
       2. When a switch/light is toggled (physically or in UI)
          Expected parameters:
-         - switch_entity_id(string) - entry name of the toggled
+         - switch_entity_id(string) - entity name of the toggled
            switch/light.
 
       3. When controller level button is pressed.
@@ -28,7 +28,7 @@ variables:
          - ctrl_device_id(string) - zwave device_id of the controller.
          - direction(string) - "up" or "down"
          (this is equivalent to "On" operation on the last controller
-          button, followed by +/-20 brightness adjustment)
+          button, followed by +/-40 brightness adjustment)
 
       Setup:
       
@@ -45,7 +45,7 @@ variables:
         'xyz': ['light.entity3', 'light.entity2', 'switch.entity4']
       }
 
-      Represents a network of 2 controllers with device ids 'abc' and 'xyz'.
+      represents a network of 2 controllers with device ids 'abc' and 'xyz'.
       Controller 'abc' has buttons 1 and 2 assigned to entity1 and entity2.
       Controller 'xyz' has buttons 1, 2, 3 assigend to entity3, entity2
       and entity4 in that order.
