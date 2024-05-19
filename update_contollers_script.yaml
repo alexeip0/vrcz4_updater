@@ -10,7 +10,7 @@ variables:
       Also updates controller LEDs to match the state of the
       switches/lights.
 
-      Can be called in 2 ways:
+      Can be called in 3 ways:
 
       1. When a controller button is pressed.
          Expected parameters:
@@ -22,6 +22,13 @@ variables:
          Expected parameters:
          - switch_entity_id(string) - entry name of the toggled
            switch/light.
+
+      3. When controller level button is pressed.
+         Expected parameters:
+         - ctrl_device_id(string) - zwave device_id of the controller.
+         - direction(string) - "up" or "down"
+         (this is equivalent to "On" operation on the last controller
+          button, followed by +/-20 brightness adjustment)
 
       Setup:
       
@@ -53,52 +60,46 @@ sequence:
       - choose:
           - conditions:
               - condition: template
-                alias: Is this is an On key press and device is Off?
-                value_template: >
-                  {{ value < 5 and states(dev_db[ctrl_device_id][value - 1]) ==
-                  'off' }}
+                alias: Is this a Level key press?
+                value_template: "{{ direction is defined }}"
             sequence:
-              - if:
-                  - condition: template
-                    value_template: >
-                      {{ dev_db[ctrl_device_id][value - 1].startswith('light')
-                      }}
-                then:
-                  - service: light.turn_on
-                    target:
-                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
-                else:
-                  - service: switch.turn_on
-                    target:
-                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 1]) }}"
-              - service: script.updatelevitonleds
+              - variables:
+                  switch_entity_id: >
+                    {{ dev_db[ctrl_device_id][int(states('input_number.' +
+                    ctrl_device_id))] }}
+              - service: script.switchturnon
+                data:
+                  dev_db: "{{dev_db}}"
+                  switch_entity_id: "{{switch_entity_id}}"
+                  offset: "{{ 40 if direction == 'up' else -40 }}"
+          - conditions:
+              - condition: template
+                alias: Is this is an On key press?
+                value_template: "{{ value < 5 }}"
+            sequence:
+              - service: script.switchturnon
                 data:
                   dev_db: "{{dev_db}}"
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 1]}}"
+              - service: input_number.set_value
+                data:
+                  value: "{{value - 1}}"
+                target:
+                  entity_id: input_number.{{ctrl_device_id}}
           - conditions:
               - condition: template
-                alias: Is this is an Off key press and device is On?
-                value_template: >
-                  {{ value > 4 and states(dev_db[ctrl_device_id][value - 5]) ==
-                  'on' }}
+                alias: Is this is an Off key press?
+                value_template: "{{ value > 4 }}"
             sequence:
-              - if:
-                  - condition: template
-                    value_template: >
-                      {{ dev_db[ctrl_device_id][value - 5].startswith('light')
-                      }}
-                then:
-                  - service: light.turn_off
-                    target:
-                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
-                else:
-                  - service: switch.turn_off
-                    target:
-                      device_id: "{{ device_id(dev_db[ctrl_device_id][value - 5]) }}"
-              - service: script.updatelevitonleds
+              - service: script.switchturnoff
                 data:
                   dev_db: "{{dev_db}}"
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 5]}}"
+              - service: input_number.set_value
+                data:
+                  value: "{{value - 5}}"
+                target:
+                  entity_id: input_number.{{ctrl_device_id}}
     else:
       - service: script.updatelevitonleds
         data:
