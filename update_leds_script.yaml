@@ -9,7 +9,7 @@ sequence:
           to match its new state.
 
           Expected parameters:
-          - dev_db(dict) - reference to deb_db in UpdateLevitonControllers
+          - dev_db(dict) - reference to dev_db in UpdateLevitonControllers
           - switch_entity_id(string) - entity_id of the switch/light that toggled
         #}
         {% set ns = namespace(ctrls=[]) %}

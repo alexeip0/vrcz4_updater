@@ -69,7 +69,6 @@ sequence:
                     ctrl_device_id))] }}
               - service: script.switchturnon
                 data:
-                  dev_db: "{{dev_db}}"
                   switch_entity_id: "{{switch_entity_id}}"
                   offset: "{{ 40 if direction == 'up' else -40 }}"
           - conditions:
@@ -79,7 +78,6 @@ sequence:
             sequence:
               - service: script.switchturnon
                 data:
-                  dev_db: "{{dev_db}}"
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 1]}}"
               - service: input_number.set_value
                 data:
@@ -93,7 +91,6 @@ sequence:
             sequence:
               - service: script.switchturnoff
                 data:
-                  dev_db: "{{dev_db}}"
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 5]}}"
               - service: input_number.set_value
                 data:
@@ -105,5 +102,5 @@ sequence:
         data:
           dev_db: "{{dev_db}}"
           switch_entity_id: "{{switch_entity_id}}"
-mode: single
+mode: queued
 icon: mdi:microsoft-xbox-controller-menu

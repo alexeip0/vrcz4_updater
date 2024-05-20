@@ -17,9 +17,5 @@ sequence:
           - service: switch.turn_off
             target:
               device_id: "{{ device_id(switch_entity_id) }}"
-      - service: script.updatelevitonleds
-        data:
-          dev_db: "{{dev_db}}"
-          switch_entity_id: "{{switch_entity_id}}"
 mode: single
 icon: mdi:light-switch-off

@@ -16,23 +16,19 @@ sequence:
           - service: switch.turn_on
             target:
               device_id: "{{ device_id(switch_entity_id) }}"
-      - service: script.updatelevitonleds
-        data:
-          dev_db: "{{dev_db}}"
-          switch_entity_id: "{{switch_entity_id}}"
   - if:
       - condition: template
         value_template: |
           {{ offset is defined and
              switch_entity_id.startswith('light') and 
-             ((offset > 0 and state_attr(switch_entity_id, 'brightness') < 255) or
-              (offset < 0 and state_attr(switch_entity_id, 'brightness') > 40)) }}
+             ((offset > 0 and (state_attr(switch_entity_id, 'brightness') or 40) < 255) or
+              (offset < 0 and (state_attr(switch_entity_id, 'brightness') or 40) > 40)) }}
     then:
       - service: light.turn_on
         data_template:
           brightness: >-
-            {{[[state_attr(switch_entity_id, 'brightness') + offset, 40]|max,
-            255]|min}}
+            {{[[(state_attr(switch_entity_id, 'brightness') or 40) + offset,
+            40]|max, 255]|min}}
         target:
           device_id: "{{ device_id(switch_entity_id) }}"
 mode: single
