@@ -27,6 +27,9 @@ For each VRCZ4 controller configure the following settings in Zwave JS UI:
 
 **Installation:**
 
+The following assumes you have figured out <device_id> of your controllers and <device_id>/<entity_id> of your lights/switches.
+Various ways of doing this are listed [here](https://community.home-assistant.io/t/device-id-entity-id-where-to-find/289230/11) (easiest, imo, creating a new dummy automation and viewing it as YAML).
+
 1. Create new script "UpdateLevitonControllers" and paste there content of update_contollers_script.yaml
    - modify 'dev_db' variable at the top of the script per instructions there.
    - for every controller device_id that you specified in 'dev_db' create input_number named
