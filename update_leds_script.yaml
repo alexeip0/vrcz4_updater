@@ -34,8 +34,7 @@ sequence:
               {{ ns.x|sum }}
               {% endmacro %}
               {{leviton_leds(dev_db[repeat.item])}}
-        - service: zwave_js.invoke_cc_api
-          data:
+        - data:
             command_class: "145"
             method_name: sendData
             parameters:
@@ -50,5 +49,6 @@ sequence:
                   - 0
                   - 10
             device_id: "{{repeat.item}}"
+          action: zwave_js.invoke_cc_api
 mode: single
 icon: mdi:ceiling-light-multiple-outline

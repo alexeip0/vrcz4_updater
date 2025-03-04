@@ -1,8 +1,7 @@
 alias: Controller Activation
 description: ""
-trigger:
-  - platform: device
-    device_id: <<< put your device_id here
+triggers:
+  - device_id: <<< put your device_id here
     domain: zwave_js
     type: event.value_notification.scene_activation
     property: sceneId
@@ -10,11 +9,12 @@ trigger:
     endpoint: 0
     command_class: 43
     subtype: Endpoint 0
->>> copy/paste "platform" block above for any additional controllers
-condition: []
-action:
-  - service: script.updatelevitoncontrollers
-    data:
+    trigger: device
+>>> copy/paste "device_id" block above for any additional controllers
+conditions: []
+actions:
+  - data:
       ctrl_device_id: "{{ trigger.event.data['device_id'] }}"
       value: "{{ trigger.event.data['value'] }}"
+    action: script.updatelevitoncontrollers
 mode: single

@@ -1,15 +1,15 @@
 alias: Controller Level
 description: ""
-trigger:
-  - platform: event
-    event_type: zwave_js_notification
+mode: single
+triggers:
+  - event_type: zwave_js_notification
     event_data:
       command_class_name: Multilevel Switch
       event_type_label: Start level change
-condition: []
-action:
-  - service: script.updatelevitoncontrollers
-    data:
+    trigger: event
+conditions: []
+actions:
+  - data:
       ctrl_device_id: "{{trigger.event.data['device_id']}}"
       direction: "{{trigger.event.data['direction']}}"
-mode: single
+    action: script.updatelevitoncontrollers

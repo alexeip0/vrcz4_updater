@@ -9,27 +9,35 @@ sequence:
             value_template: |
               {{ switch_entity_id.startswith('light') }}
         then:
-          - service: light.turn_on
-            target:
+          - target:
               device_id: "{{ device_id(switch_entity_id) }}"
+            action: light.turn_on
         else:
-          - service: switch.turn_on
-            target:
+          - target:
               device_id: "{{ device_id(switch_entity_id) }}"
+            action: switch.turn_on
+  - variables:
+      cur_bright: |
+        {% if switch_entity_id.startswith('light') %}
+        {{ state_attr(switch_entity_id, 'brightness') | int(40) }}
+        {% else %}
+        0
+        {% endif %}
   - if:
       - condition: template
         value_template: |
           {{ offset is defined and
              switch_entity_id.startswith('light') and 
-             ((offset > 0 and (state_attr(switch_entity_id, 'brightness') or 40) < 255) or
-              (offset < 0 and (state_attr(switch_entity_id, 'brightness') or 40) > 40)) }}
+             ((offset > 0 and cur_bright < 255) or
+              (offset < 0 and cur_bright > 40)) }}
     then:
-      - service: light.turn_on
-        data_template:
-          brightness: >-
-            {{[[(state_attr(switch_entity_id, 'brightness') or 40) + offset,
-            40]|max, 255]|min}}
+      - variables:
+          new_bright: |
+            {{[[cur_bright + offset, 40]|max, 255]|min}}
+      - data_template:
+          brightness: "{{new_bright}}"
         target:
           device_id: "{{ device_id(switch_entity_id) }}"
-mode: single
+        action: light.turn_on
+mode: queued
 icon: mdi:light-switch

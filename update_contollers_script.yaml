@@ -67,40 +67,40 @@ sequence:
                   switch_entity_id: >
                     {{ dev_db[ctrl_device_id][int(states('input_number.' +
                     ctrl_device_id))] }}
-              - service: script.switchturnon
-                data:
+              - data:
                   switch_entity_id: "{{switch_entity_id}}"
                   offset: "{{ 40 if direction == 'up' else -40 }}"
+                action: script.switchturnon
           - conditions:
               - condition: template
                 alias: Is this is an On key press?
                 value_template: "{{ value < 5 }}"
             sequence:
-              - service: script.switchturnon
-                data:
+              - data:
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 1]}}"
-              - service: input_number.set_value
-                data:
+                action: script.switchturnon
+              - data:
                   value: "{{value - 1}}"
                 target:
                   entity_id: input_number.{{ctrl_device_id}}
+                action: input_number.set_value
           - conditions:
               - condition: template
                 alias: Is this is an Off key press?
                 value_template: "{{ value > 4 }}"
             sequence:
-              - service: script.switchturnoff
-                data:
+              - data:
                   switch_entity_id: "{{dev_db[ctrl_device_id][value - 5]}}"
-              - service: input_number.set_value
-                data:
+                action: script.switchturnoff
+              - data:
                   value: "{{value - 5}}"
                 target:
                   entity_id: input_number.{{ctrl_device_id}}
+                action: input_number.set_value
     else:
-      - service: script.updatelevitonleds
-        data:
+      - data:
           dev_db: "{{dev_db}}"
           switch_entity_id: "{{switch_entity_id}}"
+        action: script.updatelevitonleds
 mode: queued
 icon: mdi:microsoft-xbox-controller-menu

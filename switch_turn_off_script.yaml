@@ -10,12 +10,12 @@ sequence:
             value_template: |
               {{ switch_entity_id.startswith('light') }}
         then:
-          - service: light.turn_off
-            target:
+          - target:
               device_id: "{{ device_id(switch_entity_id) }}"
+            action: light.turn_off
         else:
-          - service: switch.turn_off
-            target:
+          - target:
               device_id: "{{ device_id(switch_entity_id) }}"
-mode: single
+            action: switch.turn_off
+mode: queued
 icon: mdi:light-switch-off

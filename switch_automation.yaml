@@ -1,20 +1,20 @@
 alias: Switch Activation
 description: ""
-trigger:
-  - platform: device
-    type: changed_states
+triggers:
+  - type: changed_states
     device_id: <<< put your switch device_id
     entity_id: <<< put your switch entity_id
     domain: switch
-  - platform: device
-    type: changed_states
+    trigger: device
+  - type: changed_states
     device_id: <<< put your light device_id
     entity_id: <<< put your light entity_id
     domain: light
->>> copy/paste "platform" block above for any additional switches/lights
-condition: []
-action:
-  - service: script.updatelevitoncontrollers
-    data:
+    trigger: device
+>>> copy/paste "type" block above for any additional switches/lights
+conditions: []
+actions:
+  - data:
       switch_entity_id: "{{ trigger['entity_id'] }}"
-mode: single
+    action: script.updatelevitoncontrollers
+mode: queued
